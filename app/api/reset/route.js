@@ -14,6 +14,7 @@ export async function POST(request) {
 
     try {
         await client.query("BEGIN");
+        await client.query("DELETE FROM booking_requests");
         await client.query("DELETE FROM bookings");
         await client.query("DELETE FROM slots");
 
