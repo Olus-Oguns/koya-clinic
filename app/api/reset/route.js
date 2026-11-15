@@ -1,6 +1,9 @@
 import { db } from "../db";
+import { requireApiKey } from "../auth";
 
 export async function POST(request) {
+    const authError = requireApiKey(request);
+    if (authError) return authError;
     const { slots } = await request.json();
 
     if (!Array.isArray(slots)) {

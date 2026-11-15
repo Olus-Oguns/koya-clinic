@@ -1,6 +1,9 @@
 import { db } from "../db";
+import { requireApiKey } from "../auth";
 
 export async function GET(request) {
+    const authError = requireApiKey(request);
+    if (authError) return authError;
     const provider = new URL(request.url).searchParams.get("provider");
 
     const { rows } = await db.query(
