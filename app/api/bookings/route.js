@@ -39,12 +39,23 @@ export async function POST(request) {
         return Response.json({ error: "Slot has already started" }, { status: 400 });
     }
 
-    const { rows } = await db.query(
-        `INSERT INTO bookings (id, slot_id, name, email)
-   VALUES ($1, $2, $3, $4)
-   RETURNING id, slot_id, name, email, status, created_at`,
-        [randomUUID(), slot_id, name, email]
-    );
+    try {
+        const { rows } = await db.query(
+            `INSERT INTO bookings (id, slot_id, name, email)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, slot_id, name, email, status, created_at`,
+            [randomUUID(), slot_id, name, email]
+        );
 
-    return Response.json(rows[0], { status: 201 });
+        return Response.json(rows[0], { status: 201 });
+    } catch (error) {
+        if (
+            error.code === "23505" &&
+            error.constraint === "bookings_one_confirmed_per_slot"
+        ) {
+            return Response.json({ error: "Slot already booked" }, { status: 409 });
+        }
+
+        throw error;
+    }
 }
